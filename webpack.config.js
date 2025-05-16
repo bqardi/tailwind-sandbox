@@ -2,6 +2,20 @@ const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const glob = require("glob");
+
+// Find all HTML files in src (recursively)
+const htmlFiles = glob.sync("./src/**/*.html");
+
+// Create an HtmlWebpackPlugin instance for each HTML file
+const htmlPlugins = htmlFiles.map(
+  (file) =>
+    new HtmlWebpackPlugin({
+      template: file,
+      filename: path.relative("./src", file), // preserves folder structure
+      inject: "body",
+    })
+);
 
 module.exports = {
   entry: "./src/js/main.js",
@@ -27,9 +41,7 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: "main.css",
     }),
-    new HtmlWebpackPlugin({
-      template: "./src/index.html",
-    }),
+    ...htmlPlugins,
     new CopyWebpackPlugin({
       patterns: [{ from: "src/assets", to: "assets" }],
     }),
